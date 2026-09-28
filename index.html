@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Parcelle Bukavu — Cherchez. Publiez. Contactez.</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f5f8f6;--fg:#12231f;--card:#fff;--mut:#5d716b;--g:#0e4d45;--a:#f0a500;--line:#dce5e1;--red:#b3392b}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#0f1a18;--fg:#eaf2ef;--card:#172623;--mut:#9bb0aa;--line:#28403b;--g:#4fb59f}}
+:root[data-theme=dark]{--bg:#0f1a18;--fg:#eaf2ef;--card:#172623;--mut:#9bb0aa;--line:#28403b;--g:#4fb59f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:'Bricolage Grotesque',system-ui,sans-serif;line-height:1.5}
+header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);z-index:5}
+.logo{font-weight:800;font-size:1.15rem;cursor:pointer}.logo b{color:var(--a)}
+nav button{background:none;border:0;color:var(--fg);font:inherit;padding:6px 8px;cursor:pointer}
+main{max-width:720px;margin:0 auto;padding:16px}
+.hero{background:var(--g);color:#fff;border-radius:16px;padding:28px 20px;margin-bottom:16px}
+.hero h1{font-size:2rem;line-height:1.1;margin:0 0 10px;font-weight:800}.hero p{margin:0 0 18px;opacity:.9}
+.btn{display:inline-block;border:0;border-radius:10px;padding:12px 18px;font:inherit;font-weight:600;cursor:pointer;background:var(--a);color:#1a1300;text-decoration:none;margin:0 8px 8px 0}
+.btn.s{background:transparent;border:2px solid currentColor;color:inherit}.btn.w{background:#25D366;color:#04210f}.btn.d{background:var(--red);color:#fff}
+.btn:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--a);outline-offset:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.card .in{padding:12px 14px}.ph{height:160px;background:linear-gradient(135deg,#2e7d6b,#0e4d45);display:flex;align-items:center;justify-content:center;color:#fff8;font-size:.9rem;background-size:cover;background-position:center}
+.price{font-weight:800;font-size:1.25rem}.mut{color:var(--mut);font-size:.9rem}
+.tag{display:inline-block;font-size:.78rem;border-radius:20px;padding:2px 9px;margin:0 4px 4px 0;border:1px solid var(--line)}
+.t-non{background:#eee5;color:var(--mut)}.t-en{background:#f0a50033;border-color:var(--a)}.t-ver{background:#1e8f5a;color:#fff;border-color:#1e8f5a}.t-feat{background:var(--a);color:#1a1300;border-color:var(--a)}
+label{display:block;font-weight:600;margin:12px 0 4px}input,select,textarea{width:100%;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--fg);font:inherit}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.note{background:#f0a50022;border-left:4px solid var(--a);padding:10px 12px;border-radius:6px;font-size:.9rem;margin:12px 0}
+.gal{display:flex;gap:8px;overflow-x:auto;margin-bottom:10px}.gal img{height:190px;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:.85rem}td,th{padding:6px;border-bottom:1px solid var(--line);text-align:left}.tw{overflow-x:auto}
+.toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--g);color:#fff;padding:10px 18px;border-radius:10px;z-index:9}
+h2{margin:6px 0 12px}
+</style></head><body>
+<header><div class="logo" onclick="go('home')">Parcelle <b>Bukavu</b></div><nav><button onclick="go('search')">Annonces</button><button onclick="go('publish')">Publier</button><button onclick="go('admin')">Admin</button></nav></header>
+<main id="app"></main>
+<script>
+const $=s=>document.querySelector(s),app=$('#app');
+const QUARTIERS=['Ibanda','Kadutu','Bagira','Nguba','Panzi','Kavumu','Kabare','Nyawera','Autre'];
+const TYPES=['Résidentiel','Commercial','Agricole','Mixte'];
+const VER={non:['Non vérifiée','t-non'],en:['Vérification en cours','t-en'],ver:['Vérifiée','t-ver']};
+const ADMIN_PIN='admin123'; // À CHANGER : démo seulement, pas sécurisé
+let db=load();
+function load(){try{const d=JSON.parse(localStorage.getItem('pb_v1'));if(d)return d}catch(e){}return seed()}
+function save(){try{localStorage.setItem('pb_v1',JSON.stringify(db))}catch(e){toast('Stockage plein : moins/plus petites photos')}}
+function seed(){return[
+{id:1,nom:'Exemple A',tel:'243990000001',quartier:'Ibanda',prix:12000,sup:400,type:'Résidentiel',desc:'Parcelle plane, accès route (exemple fictif).',docs:'Certificat d’enregistrement (à vérifier)',photos:[],dispo:true,statut:'approuvee',ver:'non',feat:true,date:Date.now()},
+{id:2,nom:'Exemple B',tel:'243990000002',quartier:'Kadutu',prix:6500,sup:250,type:'Résidentiel',desc:'Petite parcelle près du marché (exemple fictif).',docs:'Non précisé',photos:[],dispo:true,statut:'approuvee',ver:'en',feat:false,date:Date.now()},
+{id:3,nom:'Exemple C',tel:'243990000003',quartier:'Kavumu',prix:20000,sup:1200,type:'Agricole',desc:'Grand terrain agricole (exemple fictif).',docs:'Non précisé',photos:[],dispo:false,statut:'approuvee',ver:'non',feat:false,date:Date.now()}]}
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2600)}
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const usd=n=>'$'+Number(n).toLocaleString('fr-FR');
+function go(v,a){window.scrollTo(0,0);({home,search,publish,admin,detail})[v](a)}
+function tags(l){return `<span class="tag ${VER[l.ver][1]}">${VER[l.ver][0]}</span>`+(l.feat?'<span class="tag t-feat">Mise en avant</span>':'')+(l.dispo?'':'<span class="tag">Vendue / indisponible</span>')}
+function cover(l){return `<div class="ph" ${l.photos[0]?`style="background-image:url(${l.photos[0]})"`:''}>${l.photos[0]?'':'Pas de photo'}</div>`}
+function cardH(l){return `<div class="card" onclick="go('detail',${l.id})" style="cursor:pointer">${cover(l)}<div class="in"><div class="price">${usd(l.prix)}</div><div>${esc(l.sup)} m² · ${esc(l.type)} · ${esc(l.quartier)}</div><div style="margin-top:6px">${tags(l)}</div></div></div>`}
+function home(){const n=db.filter(l=>l.statut==='approuvee'&&l.feat);app.innerHTML=`
+<div class="hero"><h1>Trouvez ou publiez une parcelle à Bukavu</h1><p style="font-weight:800;font-size:1.05rem">Cherchez. Publiez. Contactez. Votre parcelle à Bukavu.</p><p>Recherchez des parcelles à vendre à Bukavu et environs, et contactez directement les vendeurs sur WhatsApp.</p>
+<button class="btn" onclick="go('search')">Trouver une parcelle</button><button class="btn s" onclick="go('publish')">Publier ma parcelle</button></div>
+<div class="note"><b>Avant tout achat :</b> vérifiez vous-même les documents et la propriété (titres, bornage, services officiels). Parcelle Bukavu met en relation, mais ne garantit pas la légalité d’une parcelle.</div>
+<h2>À la une</h2>${n.map(cardH).join('')||'<p class="mut">Aucune annonce mise en avant pour le moment.</p>'}
+<h2>Pour les agences</h2><div class="card"><div class="in">Vous êtes une agence immobilière ? Affichez vos annonces en avant. <br><span class="mut">Espace publicitaire bientôt disponible.</span></div></div>`}
+let F={q:'',min:'',max:'',smin:'',type:'',dispo:''};
+function search(){app.innerHTML=`<h2>Trouver une parcelle</h2>
+<div class="grid"><div><label>Quartier</label><select id="fq"><option value="">Tous</option>${QUARTIERS.map(q=>`<option ${F.q==q?'selected':''}>${q}</option>`)}</select></div>
+<div><label>Type</label><select id="ft"><option value="">Tous</option>${TYPES.map(q=>`<option ${F.type==q?'selected':''}>${q}</option>`)}</select></div>
+<div><label>Prix min ($)</label><input id="fa" type="number" inputmode="numeric" value="${F.min}"></div><div><label>Prix max ($)</label><input id="fb" type="number" inputmode="numeric" value="${F.max}"></div>
+<div><label>Superficie min (m²)</label><input id="fs" type="number" inputmode="numeric" value="${F.smin}"></div>
+<div><label>Disponibilité</label><select id="fd"><option value="">Toutes</option><option value="1" ${F.dispo=='1'?'selected':''}>Disponibles</option></select></div></div>
+<button class="btn" style="margin-top:12px" onclick="filt()">Rechercher</button><div id="res"></div>`;filt()}
+function filt(){if($('#fq')){F={q:$('#fq').value,type:$('#ft').value,min:$('#fa').value,max:$('#fb').value,smin:$('#fs').value,dispo:$('#fd').value}}
+let r=db.filter(l=>l.statut==='approuvee'&&(!F.q||l.quartier==F.q)&&(!F.type||l.type==F.type)&&(!F.min||l.prix>=+F.min)&&(!F.max||l.prix<=+F.max)&&(!F.smin||l.sup>=+F.smin)&&(!F.dispo||l.dispo));
+r.sort((a,b)=>b.feat-a.feat||b.date-a.date);$('#res').innerHTML=`<p class="mut">${r.length} annonce(s)</p>`+(r.map(cardH).join('')||'<p>Aucun résultat. Essayez d’élargir vos critères.</p>')}
+function detail(id){const l=db.find(x=>x.id==id);if(!l)return home();const t=l.tel.replace(/\D/g,'');
+const msg=encodeURIComponent(`Bonjour, je suis intéressé par votre parcelle à ${l.quartier} (${l.sup} m², ${usd(l.prix)}) vue sur Parcelle Bukavu.`);
+app.innerHTML=`<button class="btn s" onclick="go('search')">Retour</button>
+${l.photos.length?`<div class="gal">${l.photos.map(p=>`<img src="${p}" alt="Photo de la parcelle">`).join('')}</div>`:cover(l)}
+<div style="margin-top:10px">${tags(l)}</div><div class="price">${usd(l.prix)}</div><div>${esc(l.sup)} m² · ${esc(l.type)} · ${esc(l.quartier)}</div>
+<h2>Description</h2><p>${esc(l.desc)}</p><h2>Documents annoncés par le vendeur</h2><p>${esc(l.docs)}</p>
+${l.ver!=='ver'?'<div class="note">Ces informations sont déclarées par le vendeur et n’ont pas été vérifiées par Parcelle Bukavu.</div>':''}
+<div class="note"><b>Avant toute transaction :</b> vérifiez l’identité du vendeur, les documents de propriété auprès des services compétents, le bornage sur place, et ne payez jamais avant ces vérifications.</div>
+<h2>Vendeur</h2><p>${esc(l.nom)} · ${esc(l.tel)}</p><a class="btn w" href="https://wa.me/${t}?text=${msg}" target="_blank" rel="noopener">Contacter le vendeur sur WhatsApp</a>`}
+let tmp=[];
+function publish(){tmp=[];app.innerHTML=`<h2>Publier ma parcelle</h2><p class="mut">Publication gratuite (limitée). Votre annonce sera examinée avant d’apparaître.</p>
+<label>Votre nom</label><input id="pn"><label>Téléphone WhatsApp (avec indicatif, ex. 243...)</label><input id="pt" inputmode="tel">
+<label>Quartier / commune</label><select id="pq">${QUARTIERS.map(q=>`<option>${q}</option>`)}</select>
+<div class="grid"><div><label>Prix ($)</label><input id="pp" type="number" inputmode="numeric"></div><div><label>Superficie (m²)</label><input id="ps" type="number" inputmode="numeric"></div></div>
+<label>Type de terrain</label><select id="py">${TYPES.map(q=>`<option>${q}</option>`)}</select>
+<label>Description</label><textarea id="pd" rows="4"></textarea>
+<label>Documents de propriété (que possédez-vous ?)</label><textarea id="pk" rows="2" placeholder="Ex. certificat d’enregistrement, contrat de vente..."></textarea>
+<label>Photos (max 4)</label><input id="pf" type="file" accept="image/*" multiple onchange="pics(this)"><div id="pv" class="gal" style="margin-top:8px"></div>
+<button class="btn" onclick="send()">Envoyer l’annonce</button>`}
+function pics(inp){[...inp.files].slice(0,4).forEach(f=>{const im=new Image,r=new FileReader;r.onload=e=>{im.onload=()=>{const c=document.createElement('canvas'),k=Math.min(1,700/im.width);c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);const u=c.toDataURL('image/jpeg',.6);if(tmp.length<4){tmp.push(u);$('#pv').innerHTML=tmp.map(p=>`<img src="${p}" alt="">`).join('')}};im.src=e.target.result};r.readAsDataURL(f)})}
+function send(){const g=i=>$('#'+i).value.trim();if(!g('pn')||g('pt').replace(/\D/g,'').length<9||!g('pp')||!g('ps'))return toast('Nom, téléphone, prix et superficie sont obligatoires');
+db.push({id:Date.now(),nom:g('pn'),tel:g('pt'),quartier:g('pq'),prix:+g('pp'),sup:+g('ps'),type:g('py'),desc:g('pd')||'—',docs:g('pk')||'Non précisé',photos:tmp,dispo:true,statut:'attente',ver:'non',feat:false,date:Date.now()});save();
+app.innerHTML=`<h2>Merci !</h2><p>Votre annonce a été envoyée. Elle apparaîtra après examen par notre équipe.</p><button class="btn" onclick="go('home')">Retour à l’accueil</button>`}
+let auth=false;
+function admin(){if(!auth){app.innerHTML=`<h2>Administration</h2><label>Code admin</label><input id="ap" type="password"><button class="btn" style="margin-top:12px" onclick="if($('#ap').value===ADMIN_PIN){auth=true;admin()}else toast('Code incorrect')">Entrer</button>`;return}
+app.innerHTML=`<h2>Administration</h2><div class="note">Prototype : les données sont stockées uniquement sur cet appareil. Une vraie base de données est nécessaire pour un usage réel.</div>`+
+db.slice().sort((a,b)=>b.date-a.date).map(l=>`<div class="card"><div class="in"><b>${esc(l.quartier)}</b> · ${usd(l.prix)} · ${esc(l.sup)} m² <span class="tag">${l.statut}</span>${tags(l)}<div class="mut">${esc(l.nom)} · ${esc(l.tel)}</div>
+<div style="margin-top:8px">${l.statut!=='approuvee'?`<button class="btn" onclick="upd(${l.id},{statut:'approuvee'})">Accepter</button>`:''}${l.statut!=='refusee'?`<button class="btn s" onclick="upd(${l.id},{statut:'refusee'})">Refuser</button>`:''}
+<button class="btn s" onclick="upd(${l.id},{ver:'en'})">Vérif. en cours</button><button class="btn s" onclick="if(confirm('Marquer VÉRIFIÉE ? Uniquement après une vraie vérification humaine.'))upd(${l.id},{ver:'ver'})">Vérifiée</button><button class="btn s" onclick="upd(${l.id},{ver:'non'})">Non vérifiée</button>
+<button class="btn s" onclick="upd(${l.id},{feat:${!l.feat}})">${l.feat?'Retirer la mise en avant':'Mettre en avant'}</button><button class="btn s" onclick="upd(${l.id},{dispo:${!l.dispo}})">${l.dispo?'Marquer vendue':'Remettre dispo'}</button>
+<button class="btn s" onclick="edit(${l.id})">Modifier</button><button class="btn d" onclick="if(confirm('Supprimer ?')){db=db.filter(x=>x.id!=${l.id});save();admin()}">Supprimer</button></div></div></div>`).join('')}
+function upd(id,p){Object.assign(db.find(x=>x.id==id),p);save();admin()}
+function edit(id){const l=db.find(x=>x.id==id),pr=prompt('Prix ($)',l.prix);if(pr===null)return;const s=prompt('Superficie (m²)',l.sup),d=prompt('Description',l.desc);
+if(pr&&!isNaN(+pr))l.prix=+pr;if(s&&!isNaN(+s))l.sup=+s;if(d!==null)l.desc=d;save();admin()}
+home();
+</script></body></html>
